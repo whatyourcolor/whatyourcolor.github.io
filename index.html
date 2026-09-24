@@ -150,6 +150,29 @@
   #modal .row{margin-top:0;justify-content:flex-end}
   #modalOk{background:var(--rouge)}
   .grpName{font-size:13px;color:var(--muted);font-weight:400}
+  /* Page d'introduction */
+  #s-welcome{text-align:center;overflow:hidden}
+  .wIntro{position:relative;width:170px;height:170px;margin:6px auto 22px;animation:spinW 14s linear 1.6s infinite}
+  .wIntro i{position:absolute;width:50%;height:50%;opacity:0;animation:quadIn .8s cubic-bezier(.2,.8,.2,1) forwards}
+  .wIntro .q1{left:0;top:0;background:var(--bleu);border-top-left-radius:100%;--tx:-60px;--ty:-60px;animation-delay:.1s}
+  .wIntro .q2{right:0;top:0;background:var(--rouge);border-top-right-radius:100%;--tx:60px;--ty:-60px;animation-delay:.3s}
+  .wIntro .q3{right:0;bottom:0;background:var(--jaune);border-bottom-right-radius:100%;--tx:60px;--ty:60px;animation-delay:.5s}
+  .wIntro .q4{left:0;bottom:0;background:var(--vert);border-bottom-left-radius:100%;--tx:-60px;--ty:60px;animation-delay:.7s}
+  .wIntro b{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:var(--card);box-shadow:0 0 0 6px rgba(255,255,255,.35);opacity:0;animation:pop .4s ease-out 1.2s forwards, pulse 2.4s ease-in-out 1.8s infinite}
+  @keyframes quadIn{from{opacity:0;transform:translate(var(--tx),var(--ty)) scale(.4) rotate(-40deg)}to{opacity:1;transform:none}}
+  @keyframes spinW{to{transform:rotate(360deg)}}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+  .fx{opacity:0;animation:rise .6s ease-out forwards}
+  .wChips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0 6px}
+  .wChip{display:flex;align-items:center;gap:10px;text-align:left;background:#f6f4ef;border-radius:12px;padding:10px 12px;font-size:14px;opacity:0;animation:rise .5s ease-out forwards}
+  .wChip i{width:14px;height:14px;border-radius:50%;flex:none}
+  .wChip b{display:block;font-size:14px}
+  .wChip span{color:var(--muted);font-size:12px}
+  #welcomeBtn{margin-top:14px;opacity:0;animation:rise .6s ease-out 3.2s forwards}
+  .wHint{font-size:12px;color:var(--muted);margin-top:8px;opacity:0;animation:rise .6s ease-out 3.5s forwards}
+  @media (prefers-reduced-motion:reduce){
+    .wIntro,.wIntro i,.wIntro b,.fx,.wChip,#welcomeBtn,.wHint{animation:none;opacity:1}
+  }
   @media (prefers-reduced-motion:reduce){
     .word.plus,.word.moins,#reveal .num,#reveal .name,.wheel .dot,#reveal .spin{animation:none}
     .track div{transition:none}
@@ -170,8 +193,23 @@
   </header>
 
   <main id="mainQuiz">
+  <!-- Écran 0 : introduction animée -->
+  <section id="s-welcome" class="card">
+    <div class="wIntro" aria-hidden="true"><i class="q1"></i><i class="q2"></i><i class="q3"></i><i class="q4"></i><b></b></div>
+    <h1 class="fx" style="animation-delay:1.3s">Quelle est ta couleur ?</h1>
+    <p class="sub fx" style="animation-delay:1.6s;margin-bottom:0">4 couleurs, 4 façons de penser, de réagir et de communiquer. Découvre la tienne et celle de ton groupe en 5 minutes.</p>
+    <div class="wChips">
+      <div class="wChip" style="animation-delay:2.0s"><i style="background:var(--rouge)"></i><div><b>Rouge Feu</b><span>Action, décision</span></div></div>
+      <div class="wChip" style="animation-delay:2.2s"><i style="background:var(--jaune)"></i><div><b>Jaune Soleil</b><span>Énergie, contact</span></div></div>
+      <div class="wChip" style="animation-delay:2.4s"><i style="background:var(--vert)"></i><div><b>Vert Terre</b><span>Écoute, harmonie</span></div></div>
+      <div class="wChip" style="animation-delay:2.6s"><i style="background:var(--bleu)"></i><div><b>Bleu Glacier</b><span>Rigueur, méthode</span></div></div>
+    </div>
+    <button class="btn" id="welcomeBtn" onclick="goIntro()">C'est parti</button>
+    <div class="wHint">25 questions · environ 5 minutes</div>
+  </section>
+
   <!-- Écran 1 : identité -->
-  <section id="s-intro" class="card">
+  <section id="s-intro" class="card hidden">
     <h1>Quelle est ta couleur au travail ?</h1>
     <p class="sub">25 groupes de 4 mots. Dans chaque groupe, choisis le mot qui te ressemble le plus, puis celui qui te ressemble le moins. Réponds spontanément, il n'y a pas de bonne réponse.</p>
     <label for="nom">Nom de famille</label>
@@ -415,13 +453,14 @@ function show(tab){
   $('tabQuiz').classList.toggle('on',tab==='quiz');
   $('tabTeam').classList.toggle('on',tab==='team');
   $('s-team').classList.toggle('hidden',tab!=='team');
-  const quizScreens=['s-intro','s-warmup','s-quiz','s-result'];
+  const quizScreens=['s-welcome','s-intro','s-warmup','s-quiz','s-result'];
   $('mainQuiz').classList.toggle('hidden',tab==='team');
   if(tab==='team'){ quizScreens.forEach(s=>$(s).classList.add('hidden')); window.scrollTo(0,0); loadTeam(); }
   else { quizScreens.forEach(s=>$(s).classList.toggle('hidden',s!==currentQuizScreen)); }
 }
-let currentQuizScreen='s-intro';
+let currentQuizScreen='s-welcome';
 function goQuiz(screen){ currentQuizScreen=screen; show('quiz'); window.scrollTo(0,0); }
+function goIntro(){ goQuiz('s-intro'); setTimeout(()=>{ try{ $('nom').focus(); }catch(e){} },50); }
 
 ['nom','province'].forEach(id=>$(id).addEventListener('input',()=>{
   $('startBtn').disabled = !($('nom').value.trim() && $('province').value.trim());
@@ -446,7 +485,8 @@ document.addEventListener('keydown',e=>{
   if(e.key!=='Enter' || revealing || e.isComposing) return;
   if(document.activeElement && document.activeElement.id==='adminCode'){ e.preventDefault(); loginAdmin(); return; }
   if(!$('s-team').classList.contains('hidden')) return;
-  if(currentQuizScreen==='s-intro'){ if(!$('startBtn').disabled){ e.preventDefault(); start(); } }
+  if(currentQuizScreen==='s-welcome'){ e.preventDefault(); goIntro(); }
+  else if(currentQuizScreen==='s-intro'){ if(!$('startBtn').disabled){ e.preventDefault(); start(); } }
   else if(currentQuizScreen==='s-warmup'){ e.preventDefault(); goQuiz('s-quiz'); renderQ(); }
   else if(currentQuizScreen==='s-quiz'){ e.preventDefault(); if(!$('nextBtn').disabled) next(); }
 });
